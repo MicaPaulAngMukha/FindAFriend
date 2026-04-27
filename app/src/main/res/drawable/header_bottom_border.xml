@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- This is the main background color -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+    <!-- This is the bottom border -->
+    <item android:gravity="bottom">
+        <shape android:shape="rectangle">
+            <size android:height="2dp" />
+            <solid android:color="#66006C" />
+        </shape>
+    </item>
+</layer-list>

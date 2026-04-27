@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "35495012301",
+    "project_id": "findafriend-a2992",
+    "storage_bucket": "findafriend-a2992.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:35495012301:android:8727d01489b294a80c8684",
+        "android_client_info": {
+          "package_name": "com.example.task_perf1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCauWrnsEuamOWuEzVuK1-V1_InXRLPss4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

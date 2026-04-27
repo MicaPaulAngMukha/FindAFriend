@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="First Name"
+        android:textSize="18sp"
+        android:textColor="#4A148C"
+        android:fontFamily="@font/nunito"/>
+
+    <EditText
+        android:id="@+id/first_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:background="@drawable/edit_text_border_blue"
+        android:fontFamily="@font/nunito" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Last Name"
+        android:textSize="18sp"
+        android:textColor="#4A148C"
+        android:fontFamily="@font/nunito"/>
+
+    <EditText
+        android:id="@+id/last_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:background="@drawable/edit_text_border_purple"
+        android:fontFamily="@font/nunito" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Birth Date"
+        android:textSize="18sp"
+        android:textColor="#4A148C"
+        android:fontFamily="@font/nunito"/>
+
+    <EditText
+        android:id="@+id/birth_date_input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="8dp"
+        android:padding="8dp"
+        android:focusable="false"
+        android:clickable="true"
+        android:hint="Select Birth Date"
+        android:background="@drawable/edit_text_border_purple"
+        android:fontFamily="@font/nunito" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/button_login_background"
+            android:text="Back"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/nunito"/>
+
+        <Button
+            android:id="@+id/next_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_login_background"
+            android:text="Next"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/nunito"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Task_Perf1</string>
+    <string name="terms_and_conditions">
+        <![CDATA[
+        <p><b>1. ACCEPTANCE OF TERMS</b><br/>
+        By accessing or using the FindAFriend messaging application (the "Service"), you agree to be bound by these Terms and Conditions. This Service is a student-led school project and is not intended for commercial distribution or long-term public use. If you do not agree to these terms, do not use the Service.</p>
+
+        <p><b>2. ELIGIBILITY</b><br/>
+        You must be at least 18 years of age to use this Service. FindAFriend does not knowingly collect data from or provide a platform for minors. By clicking "Agree," you represent that you are an adult of legal age.</p>
+
+        <p><b>3. USER CONDUCT & "ZERO TOLERANCE" POLICY</b><br/>
+        While we provide the platform, we do not endorse or control user behavior. However, to maintain the integrity of the project, the following are strictly prohibited:<br/>
+        - Harassment & Hate Speech: Any form of bullying, racism, or discrimination.<br/>
+        - Explicit Content: Transmission of pornography, nudity, or sexually suggestive material.<br/>
+        - Illegal Acts: Using the app to facilitate any crime under the laws of the Philippines or your local jurisdiction.<br/>
+        - Privacy Infringement: Recording or "screengrabbing" other users without explicit verbal and written consent.</p>
+
+        <p><b>4. LIMITATION OF LIABILITY (THE "NO RESPONSIBILITY" CLAUSE)</b><br/>
+        The developers of FindAFriend act solely as a technical intermediary.<br/>
+        - User Actions: Any and all activity performed by a user—including text sent, images shared, or video broadcasted—is the sole responsibility of that user.<br/>
+        - No Oversight: The developers do not (and cannot) monitor all live interactions in real-time.<br/>
+        - Indemnification: You agree to hold the developers, their instructors, and the educational institution harmless from any claims, psychological distress, or legal issues arising from your interactions with other strangers on the platform. You use FindAFriend at your own risk.</p>
+
+        <p><b>5. RIGHT TO TERMINATE & BAN</b><br/>
+        The developers reserve the right to "punish" any user who disrupts the Service. We may, at our sole discretion and without prior notice:<br/>
+        - Permanently ban IP addresses.<br/>
+        - Terminate active sessions.<br/>
+        - Blacklist specific device IDs.</p>
+
+        <p><b>6. DATA & SECURITY DISCLAIMER</b><br/>
+        This app is a prototype. It may contain security vulnerabilities. We do not guarantee that your conversations are encrypted or private. Do not share personal information (names, addresses, or banking details) with anyone on the app.</p>
+
+        <p><b>7. CHANGES TO TERMS</b><br/>
+        As this is a developing school project, these terms may change at any time to meet grading requirements or technical shifts.</p>
+        ]]>
+    </string>
+</resources>
