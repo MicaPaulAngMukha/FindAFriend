@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
@@ -53,14 +54,9 @@ public class ProfileActivity extends AppCompatActivity {
                 startActivity(intent);
             });
 
-            logoutButton.setOnClickListener(v -> {
-                sharedPref.edit().remove("LOGGED_IN_USER").apply();
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.putExtra("FROM_LOGOUT", true);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            });
+            logoutButton.setOnClickListener(v -> showLogoutConfirmationDialog());
 
+            bottomNavigationView.setSelectedItemId(R.id.navigation_chats); // Profile is usually reached from here or home
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.navigation_home) {
@@ -76,6 +72,23 @@ public class ProfileActivity extends AppCompatActivity {
                 return false;
             });
         }
+    }
+
+    private void showLogoutConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Log Out")
+                .setMessage("Are you sure you want to log out?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+                    sharedPref.edit().remove("LOGGED_IN_USER").apply();
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.putExtra("FROM_LOGOUT", true);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     @Override

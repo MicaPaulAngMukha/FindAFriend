@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -87,22 +88,33 @@ public class EditProfileActivity extends AppCompatActivity {
             if (db.updateUser(currentUsername, newUsername, newBio, selectedInterests, selectedImageBytes)) {
                 sharedPref.edit().putString("LOGGED_IN_USER", newUsername).apply();
                 Toast.makeText(this, "Profile Updated!", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK); // Notify that profile was updated
                 finish();
             } else {
                 Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
             }
         });
 
-        deleteAccountButton.setOnClickListener(v -> {
-            if (db.deleteUser(currentUsername)) {
-                sharedPref.edit().clear().apply();
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-                Toast.makeText(this, "Account Deleted", Toast.LENGTH_SHORT).show();
-            }
-        });
+        deleteAccountButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+    }
+
+    private void showDeleteConfirmationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Account")
+                .setMessage("Are you sure you want to delete your account? Your account information will be deleted in 90 days. You can log in before 90 days to reverse the decision.")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    if (db.deleteUser(currentUsername)) {
+                        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+                        sharedPref.edit().clear().apply();
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        Toast.makeText(this, "Account deletion in progress.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
     private void loadUserData() {
