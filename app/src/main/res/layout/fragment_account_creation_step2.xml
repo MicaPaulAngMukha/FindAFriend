@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -31,15 +32,24 @@
         android:textColor="#4A148C"
         android:fontFamily="@font/nunito"/>
 
-    <EditText
-        android:id="@+id/password_input"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:padding="8dp"
-        android:inputType="textPassword"
-        android:background="@drawable/edit_text_border_purple"
-        android:fontFamily="@font/nunito" />
+        app:passwordToggleEnabled="true"
+        app:passwordToggleDrawable="@drawable/password_toggle_selector"
+        app:passwordToggleTint="#4A148C"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/password_input"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:inputType="textPassword"
+            android:background="@drawable/edit_text_border_purple"
+            android:fontFamily="@font/nunito" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="wrap_content"
@@ -50,15 +60,24 @@
         android:textColor="#4A148C"
         android:fontFamily="@font/nunito"/>
 
-    <EditText
-        android:id="@+id/confirm_password_input"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:padding="8dp"
-        android:inputType="textPassword"
-        android:background="@drawable/edit_text_border_purple"
-        android:fontFamily="@font/nunito" />
+        app:passwordToggleEnabled="true"
+        app:passwordToggleDrawable="@drawable/password_toggle_selector"
+        app:passwordToggleTint="#4A148C"
+        app:hintEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/confirm_password_input"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:inputType="textPassword"
+            android:background="@drawable/edit_text_border_purple"
+            android:fontFamily="@font/nunito" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
