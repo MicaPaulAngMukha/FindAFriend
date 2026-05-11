@@ -2,6 +2,8 @@ package com.example.task_perf1;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -25,6 +27,10 @@ public class MeetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meet);
 
+        databaseHelper db = new databaseHelper(this);
+        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
+
         RecyclerView interestsRecyclerView = findViewById(R.id.interests_recycler_view);
         InterestAdapter adapter = new InterestAdapter(this, interestsArr);
         interestsRecyclerView.setAdapter(adapter);
@@ -32,14 +38,17 @@ public class MeetActivity extends AppCompatActivity {
 
         ImageView profileIcon = findViewById(R.id.profile_icon);
         profileIcon.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        
+        // Load Current User Profile Pic
+        userData user = db.getUserProfile(currentUser);
+        if (user != null && user.profilePicture != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
+            profileIcon.setImageBitmap(bitmap);
+        }
 
         // Handle Connect Now button
         Button connectNowButton = findViewById(R.id.connect_now_button);
         connectNowButton.setOnClickListener(v -> {
-            databaseHelper db = new databaseHelper(this);
-            SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-            String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
-
             // Ask the database to pick a random partner directly
             String randomPartner = db.getRandomUser(currentUser);
             

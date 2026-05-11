@@ -15,7 +15,7 @@ import java.util.Locale;
 
 public class databaseHelper extends SQLiteOpenHelper{
     private static final String databaseName = "FindAFriend.db";
-    private static final int databaseVersion = 4; 
+    private static final int databaseVersion = 5; 
 
     public databaseHelper(Context context){
         super(context, databaseName, null, databaseVersion);
@@ -51,17 +51,42 @@ public class databaseHelper extends SQLiteOpenHelper{
                 "MessageText TEXT NOT NULL," +
                 "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
 
+        String archivedChats = "CREATE TABLE archived_chats (" +
+                "userID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                "partnerID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                "PRIMARY KEY (userID, partnerID))";
+
+        String blockedUsers = "CREATE TABLE blocked_users (" +
+                "userID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                "blockedID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                "PRIMARY KEY (userID, blockedID))";
+
         db.execSQL(usersTable);
         db.execSQL(interestsTable);
         db.execSQL(messages);
+        db.execSQL(archivedChats);
+        db.execSQL(blockedUsers);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS interests");
-        db.execSQL("DROP TABLE IF EXISTS messages");
-        db.execSQL("DROP TABLE IF EXISTS users");
-        onCreate(db);
+        if (oldVersion < 5) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS archived_chats (" +
+                    "userID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                    "partnerID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                    "PRIMARY KEY (userID, partnerID))");
+            db.execSQL("CREATE TABLE IF NOT EXISTS blocked_users (" +
+                    "userID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                    "blockedID INTEGER REFERENCES users(userID) ON DELETE CASCADE," +
+                    "PRIMARY KEY (userID, blockedID))");
+        } else {
+            db.execSQL("DROP TABLE IF EXISTS archived_chats");
+            db.execSQL("DROP TABLE IF EXISTS blocked_users");
+            db.execSQL("DROP TABLE IF EXISTS interests");
+            db.execSQL("DROP TABLE IF EXISTS messages");
+            db.execSQL("DROP TABLE IF EXISTS users");
+            onCreate(db);
+        }
     }
 
     public boolean addNewUser (String firstName, String lastName, String birthDate, String username, String password, String[] interests){
@@ -198,9 +223,13 @@ public class databaseHelper extends SQLiteOpenHelper{
         String query = "SELECT username FROM users WHERE userID IN (" +
                 "SELECT ReceiverID FROM messages WHERE SenderID = ? " +
                 "UNION " +
-                "SELECT SenderID FROM messages WHERE ReceiverID = ?)";
+                "SELECT SenderID FROM messages WHERE ReceiverID = ?) " +
+                "AND userID != ? " +
+                "AND userID NOT IN (SELECT partnerID FROM archived_chats WHERE userID = ?) " +
+                "AND userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
+                "AND userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?)";
 
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(currentUserID), String.valueOf(currentUserID)});
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(currentUserID), String.valueOf(currentUserID), String.valueOf(currentUserID), String.valueOf(currentUserID), String.valueOf(currentUserID), String.valueOf(currentUserID)});
         if (cursor.moveToFirst()) {
             do {
                 partnerUsernames.add(cursor.getString(0));
@@ -210,14 +239,74 @@ public class databaseHelper extends SQLiteOpenHelper{
         return partnerUsernames;
     }
 
+    public List<String> loadArchivedChats(String currentUsername) {
+        List<String> partnerUsernames = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        int currentUserID = getUserID(currentUsername);
+        if (currentUserID == -1) return partnerUsernames;
+
+        String query = "SELECT username FROM users WHERE userID IN (SELECT partnerID FROM archived_chats WHERE userID = ?)";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(currentUserID)});
+        if (cursor.moveToFirst()) {
+            do {
+                partnerUsernames.add(cursor.getString(0));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return partnerUsernames;
+    }
+
+    public boolean archiveChat(int userID, int partnerID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("userID", userID);
+        values.put("partnerID", partnerID);
+        return db.insert("archived_chats", null, values) != -1;
+    }
+
+    public boolean unarchiveChat(int userID, int partnerID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete("archived_chats", "userID = ? AND partnerID = ?", new String[]{String.valueOf(userID), String.valueOf(partnerID)}) > 0;
+    }
+
+    public boolean isChatArchived(int userID, int partnerID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT 1 FROM archived_chats WHERE userID = ? AND partnerID = ?", new String[]{String.valueOf(userID), String.valueOf(partnerID)});
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
+    public boolean blockUser(int userID, int blockedID) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("userID", userID);
+        values.put("blockedID", blockedID);
+        return db.insert("blocked_users", null, values) != -1;
+    }
+
+    public boolean isUserBlocked(int userID, int partnerID) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT 1 FROM blocked_users WHERE (userID = ? AND blockedID = ?) OR (userID = ? AND blockedID = ?)", 
+            new String[]{String.valueOf(userID), String.valueOf(partnerID), String.valueOf(partnerID), String.valueOf(userID)});
+        boolean exists = cursor.moveToFirst();
+        cursor.close();
+        return exists;
+    }
+
     public String getRandomUser(String currentUsername) {
         SQLiteDatabase db = this.getReadableDatabase();
+        int currentUserID = getUserID(currentUsername);
+        
         String interestMatchQuery = "SELECT u.username FROM users u JOIN interests i ON u.userID = i.userID " +
                 "WHERE u.username != ? AND u.isArchived = 0 " +
+                "AND u.userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
+                "AND u.userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?) " +
                 "AND i.interest IN (SELECT interest FROM interests WHERE userID = (SELECT userID FROM users WHERE username = ?)) " +
                 "ORDER BY RANDOM() LIMIT 1";
         
-        Cursor cursor = db.rawQuery(interestMatchQuery, new String[]{currentUsername, currentUsername});
+        Cursor cursor = db.rawQuery(interestMatchQuery, new String[]{currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID), currentUsername});
         if (cursor.moveToFirst()) {
             String partner = cursor.getString(0);
             cursor.close();
@@ -225,7 +314,10 @@ public class databaseHelper extends SQLiteOpenHelper{
         }
         cursor.close();
 
-        Cursor fallback = db.rawQuery("SELECT username FROM users WHERE username != ? AND isArchived = 0 ORDER BY RANDOM() LIMIT 1", new String[]{currentUsername});
+        Cursor fallback = db.rawQuery("SELECT username FROM users WHERE username != ? AND isArchived = 0 " +
+                "AND userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
+                "AND userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?) " +
+                "ORDER BY RANDOM() LIMIT 1", new String[]{currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID)});
         String partner = null;
         if (fallback.moveToFirst()) {
             partner = fallback.getString(0);
@@ -262,12 +354,15 @@ public class databaseHelper extends SQLiteOpenHelper{
     public List<userData> loadUsersByInterest(String interestType, String currentUsername) {
         List<userData> users = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
+        int currentUserID = getUserID(currentUsername);
         
         String query = "SELECT u.* FROM users u " +
                 "JOIN interests i ON u.userID = i.userID " +
-                "WHERE i.interest = ? AND u.username != ? AND u.isArchived = 0";
+                "WHERE i.interest = ? AND u.username != ? AND u.isArchived = 0 " +
+                "AND u.userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
+                "AND u.userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?)";
         
-        Cursor cursor = db.rawQuery(query, new String[]{interestType, currentUsername});
+        Cursor cursor = db.rawQuery(query, new String[]{interestType, currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID)});
 
         if (cursor.moveToFirst()) {
             do {
@@ -275,8 +370,6 @@ public class databaseHelper extends SQLiteOpenHelper{
                 data.username = cursor.getString(cursor.getColumnIndexOrThrow("username"));
                 data.biography = cursor.getString(cursor.getColumnIndexOrThrow("userBio"));
                 data.profilePicture = cursor.getBlob(cursor.getColumnIndexOrThrow("profilePicture"));
-                // Note: interests are not fully populated here for efficiency, 
-                // but you can add a separate query if needed.
                 users.add(data);
             } while (cursor.moveToNext());
         }
@@ -312,6 +405,7 @@ public class databaseHelper extends SQLiteOpenHelper{
         }
 
         else{
+            if (cursor != null) cursor.close();
             return false;
         }
     }

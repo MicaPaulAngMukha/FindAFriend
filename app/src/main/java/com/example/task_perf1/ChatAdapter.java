@@ -2,9 +2,12 @@ package com.example.task_perf1;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,10 +17,21 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private final Context context;
     private final List<String> usernames;
+    private final databaseHelper db;
+    private OnItemLongClickListener longClickListener;
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(String username);
+    }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+        this.longClickListener = listener;
+    }
 
     public ChatAdapter(Context context, List<String> usernames) {
         this.context = context;
         this.usernames = usernames;
+        this.db = new databaseHelper(context);
     }
 
     @NonNull
@@ -32,10 +46,27 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         String username = usernames.get(position);
         holder.usernameText.setText(username);
 
+        // Fetch and set profile picture
+        userData user = db.getUserProfile(username);
+        if (user != null && user.profilePicture != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
+            holder.profileImage.setImageBitmap(bitmap);
+        } else {
+            holder.profileImage.setImageResource(R.drawable.ic_profile_placeholder);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, MessagingActivity.class);
             intent.putExtra("USERNAME", username);
             context.startActivity(intent);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (longClickListener != null) {
+                longClickListener.onItemLongClick(username);
+                return true;
+            }
+            return false;
         });
     }
 
@@ -46,10 +77,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView usernameText;
+        ImageView profileImage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             usernameText = itemView.findViewById(R.id.username_text);
+            profileImage = itemView.findViewById(R.id.profile_image);
         }
     }
 }

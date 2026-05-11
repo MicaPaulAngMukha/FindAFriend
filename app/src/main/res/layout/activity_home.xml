@@ -23,11 +23,16 @@
             android:textColor="#4A148C"
             android:textSize="34sp" />
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/profile_icon"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/icons8_profile" />
+            android:padding="2dp"
+            android:src="@drawable/icons8_profile"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView"
+            app:strokeColor="#4A148C"
+            app:strokeWidth="1dp" />
     </LinearLayout>
 
     <!-- Content -->

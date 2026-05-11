@@ -24,11 +24,14 @@
         <activity android:name=".HomeActivity" />
         <activity android:name=".MeetActivity" />
         <activity android:name=".InterestActivity" />
-        <activity android:name=".MessagingActivity" />
+        <activity
+            android:name=".MessagingActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ChatActivity" />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".EditProfileActivity" />
         <activity android:name=".ForgotPasswordActivity" />
+        <activity android:name=".ArchivedChatsActivity" />
     </application>
 
 </manifest>

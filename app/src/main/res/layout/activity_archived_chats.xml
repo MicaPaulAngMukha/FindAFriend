@@ -14,69 +14,48 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:fontFamily="@font/nunito"
-            android:text="Chat"
-            android:textColor="#4A148C"
-            android:textSize="34sp" />
-
         <ImageView
-            android:id="@+id/archive_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:padding="4dp"
-            android:src="@drawable/icons8_box"
+            android:id="@+id/back_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/icons8_back"
             android:tint="#4A148C" />
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/profile_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="2dp"
-            android:src="@drawable/icons8_profile"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView"
-            app:strokeColor="#4A148C"
-            app:strokeWidth="1dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/nunito"
+            android:text="Archived Chats"
+            android:textColor="#4A148C"
+            android:textSize="24sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <!-- Content -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom_navigation"
         android:layout_below="@+id/header">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/chats_recycler_view"
+            android:id="@+id/archived_chats_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="16dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         <TextView
-            android:id="@+id/no_recent_chats_text"
+            android:id="@+id/no_archived_chats_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="No recent chats"
+            android:text="No archived chats"
             android:textColor="#808080"
             android:textSize="18sp"
             android:visibility="gone"
             android:fontFamily="@font/nunito"/>
 
     </FrameLayout>
-
-    <!-- Bottom Navigation -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/bottom_nav_menu" />
 
 </RelativeLayout>

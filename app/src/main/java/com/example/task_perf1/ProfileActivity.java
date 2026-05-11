@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,57 +27,67 @@ public class ProfileActivity extends AppCompatActivity {
         TextView editButton = findViewById(R.id.edit_button);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // 1. Read the saved username from SharedPreferences
-        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        String username = sharedPref.getString("LOGGED_IN_USER", null);
+        // Check if we are viewing someone else's profile
+        String viewUsername = getIntent().getStringExtra("VIEW_USERNAME");
+        boolean isOwnProfile = (viewUsername == null);
 
-        // 2. If a user is logged in, set up their profile
+        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String username = isOwnProfile ? sharedPref.getString("LOGGED_IN_USER", null) : viewUsername;
+
+        if (!isOwnProfile) {
+            // Hide Edit and Logout buttons if viewing someone else
+            if (editButton != null) editButton.setVisibility(View.GONE);
+            if (logoutButton != null) logoutButton.setVisibility(View.GONE);
+            if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.GONE);
+        }
+
         if (username != null) {
             setupProfileData(username);
         }
 
         backArrow.setOnClickListener(v -> finish());
 
-        editButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, EditProfileActivity.class);
-            startActivity(intent);
-        });
+        if (isOwnProfile) {
+            editButton.setOnClickListener(v -> {
+                Intent intent = new Intent(this, EditProfileActivity.class);
+                startActivity(intent);
+            });
 
-        logoutButton.setOnClickListener(v -> {
-            // Clear the saved user on logout
-            sharedPref.edit().remove("LOGGED_IN_USER").apply();
-            
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra("FROM_LOGOUT", true);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
+            logoutButton.setOnClickListener(v -> {
+                sharedPref.edit().remove("LOGGED_IN_USER").apply();
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra("FROM_LOGOUT", true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            });
 
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.navigation_home) {
-                startActivity(new Intent(this, HomeActivity.class));
-                return true;
-            } else if (itemId == R.id.navigation_chats) {
-                startActivity(new Intent(this, ChatActivity.class));
-                return true;
-            } else if (itemId == R.id.navigation_friends) {
-                startActivity(new Intent(this, MeetActivity.class));
-                return true;
-            }
-            return false;
-        });
+            bottomNavigationView.setOnItemSelectedListener(item -> {
+                int itemId = item.getItemId();
+                if (itemId == R.id.navigation_home) {
+                    startActivity(new Intent(this, HomeActivity.class));
+                    return true;
+                } else if (itemId == R.id.navigation_chats) {
+                    startActivity(new Intent(this, ChatActivity.class));
+                    return true;
+                } else if (itemId == R.id.navigation_friends) {
+                    startActivity(new Intent(this, MeetActivity.class));
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        String username = sharedPref.getString("LOGGED_IN_USER", null);
-
-        if (username != null) {
-            setupProfileData(username);
+        String viewUsername = getIntent().getStringExtra("VIEW_USERNAME");
+        if (viewUsername == null) {
+            SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+            String username = sharedPref.getString("LOGGED_IN_USER", null);
+            if (username != null) {
+                setupProfileData(username);
+            }
         }
     }
 
@@ -94,13 +105,11 @@ public class ProfileActivity extends AppCompatActivity {
             if (usernameDisplay != null) usernameDisplay.setText("@" + user.username);
             if (bioText != null) bioText.setText(user.biography);
 
-            // Set Profile Picture
             if (user.profilePicture != null && profileImage != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
                 profileImage.setImageBitmap(bitmap);
             }
 
-            // Setup Interests ChipGroup
             ChipGroup chipGroup = findViewById(R.id.profile_interest_chip_group);
             if (chipGroup != null && user.interests != null) {
                 chipGroup.removeAllViews();

@@ -2,6 +2,8 @@ package com.example.task_perf1;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -27,6 +29,10 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        databaseHelper db = new databaseHelper(this);
+        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
+
         // 1. Setup Interests (Static list for now)
         RecyclerView interestsRecyclerView = findViewById(R.id.interests_recycler_view);
         InterestAdapter interestAdapter = new InterestAdapter(this, interestsArr);
@@ -36,12 +42,15 @@ public class HomeActivity extends AppCompatActivity {
         // 2. Setup Profile Icon
         ImageView profileIcon = findViewById(R.id.profile_icon);
         profileIcon.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
+        
+        // Load Current User Profile Pic
+        userData user = db.getUserProfile(currentUser);
+        if (user != null && user.profilePicture != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
+            profileIcon.setImageBitmap(bitmap);
+        }
 
         // 3. Setup Recent Chats from Database
-        databaseHelper db = new databaseHelper(this);
-        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
-
         List<String> chatsList = db.loadChatHistory(currentUser);
 
         TextView noChatsText = findViewById(R.id.no_recent_chats_text);
