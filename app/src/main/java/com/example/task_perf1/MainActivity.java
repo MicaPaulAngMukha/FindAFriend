@@ -21,10 +21,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (!getIntent().hasExtra("FROM_ACCOUNT_CREATION") && !getIntent().hasExtra("FROM_LOGOUT")) {
-            Toast.makeText(this, "Created!", Toast.LENGTH_SHORT).show();
-        }
-
         Button loginButton = findViewById(R.id.login_button);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,14 +77,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void handleOnBackPressed() {
                 isBackPressed = true;
-
-                Toast.makeText(getApplicationContext(), "Paused!", Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), "Stopped!", Toast.LENGTH_SHORT).show();
-                Toast.makeText(getApplicationContext(), "Destroyed!", Toast.LENGTH_SHORT).show();
-
-                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() ->
-                                finishAffinity(),
-                        3000);
+                finishAffinity();
             }
         });
     }
@@ -96,28 +85,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!getIntent().hasExtra("FROM_ACCOUNT_CREATION") && !getIntent().hasExtra("FROM_LOGOUT")) {
-            Toast.makeText(this, "Resumed!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (!getIntent().hasExtra("FROM_ACCOUNT_CREATION") && !getIntent().hasExtra("FROM_LOGOUT")) {
-            Toast.makeText(this, "Started!", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (!isNavigatingInternally && !isBackPressed) {
-            Toast paused = Toast.makeText(getApplicationContext(), "Paused!", Toast.LENGTH_SHORT);
-            Toast stopped = Toast.makeText(getApplicationContext(), "Stopped!", Toast.LENGTH_SHORT);
-            paused.show();
-            stopped.show();
-        }
     }
 
     @Override
@@ -129,16 +106,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (isBackPressed) {
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() ->
-                            Toast.makeText(getApplicationContext(), "Destroyed!", Toast.LENGTH_SHORT).show(),
-                    300);
-        }
     }
 
     @Override
     public void onRestart() {
         super.onRestart();
-        Toast.makeText(getApplicationContext(), "Restarted!", Toast.LENGTH_SHORT).show();
      }
 }
