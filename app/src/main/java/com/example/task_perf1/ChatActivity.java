@@ -27,6 +27,9 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        // Standardized UI: Removed manual padding logic.
+        // Handled by fitsSystemWindows="true" in activity_chat.xml.
+
         // 1. Setup Database and User info
         db = new databaseHelper(this);
         SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
@@ -43,11 +46,7 @@ public class ChatActivity extends AppCompatActivity {
         profileIcon.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         
         // Load Current User Profile Pic
-        userData user = db.getUserProfile(currentUser);
-        if (user != null && user.profilePicture != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
-            profileIcon.setImageBitmap(bitmap);
-        }
+        refreshProfileIcon();
 
         // Setup Archive Button
         ImageView archiveButton = findViewById(R.id.archive_button);
@@ -77,6 +76,18 @@ public class ChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshChatHistory();
+        refreshProfileIcon();
+    }
+
+    private void refreshProfileIcon() {
+        ImageView profileIcon = findViewById(R.id.profile_icon);
+        userData user = db.getUserProfile(currentUser);
+        if (user != null && user.profilePicture != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
+            profileIcon.setImageBitmap(bitmap);
+        } else {
+            profileIcon.setImageResource(R.drawable.icons8_profile);
+        }
     }
 
     private void refreshChatHistory() {

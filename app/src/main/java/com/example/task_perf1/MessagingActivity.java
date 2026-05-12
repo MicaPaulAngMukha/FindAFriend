@@ -15,9 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
@@ -41,15 +38,8 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        // Fix for navigation bar overlap
-        View mainLayout = findViewById(R.id.main_messaging_layout);
-        if (mainLayout != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, 0, systemBars.right, systemBars.bottom);
-                return insets;
-            });
-        }
+        // Removed manual padding logic to prevent double gaps.
+        // fitsSystemWindows="true" in activity_messaging.xml will handle the space correctly.
 
         db = new databaseHelper(this);
 

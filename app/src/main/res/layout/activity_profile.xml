@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_profile_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF">
@@ -10,6 +11,7 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/header_bottom_border"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="16dp">
@@ -65,6 +67,7 @@
                 android:layout_height="120dp"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/ic_profile_placeholder"
+                android:scaleType="centerCrop"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView" />
 
             <TextView

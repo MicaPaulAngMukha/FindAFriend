@@ -11,6 +11,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -18,45 +21,50 @@ import com.google.android.material.imageview.ShapeableImageView;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    private String username;
+    private boolean isOwnProfile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Fix for status bar clashing - apply padding to the header only
+        View header = findViewById(R.id.header);
+        if (header != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(header, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), systemBars.top, v.getPaddingRight(), v.getPaddingBottom());
+                return insets;
+            });
+        }
 
         ImageView backArrow = findViewById(R.id.back_arrow);
         Button logoutButton = findViewById(R.id.logout_button);
         TextView editButton = findViewById(R.id.edit_button);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Check if we are viewing someone else's profile
         String viewUsername = getIntent().getStringExtra("VIEW_USERNAME");
-        boolean isOwnProfile = (viewUsername == null);
+        isOwnProfile = (viewUsername == null);
 
         SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        String username = isOwnProfile ? sharedPref.getString("LOGGED_IN_USER", null) : viewUsername;
+        username = isOwnProfile ? sharedPref.getString("LOGGED_IN_USER", null) : viewUsername;
 
         if (!isOwnProfile) {
-            // Hide Edit and Logout buttons if viewing someone else
             if (editButton != null) editButton.setVisibility(View.GONE);
             if (logoutButton != null) logoutButton.setVisibility(View.GONE);
             if (bottomNavigationView != null) bottomNavigationView.setVisibility(View.GONE);
-        }
-
-        if (username != null) {
-            setupProfileData(username);
         }
 
         backArrow.setOnClickListener(v -> finish());
 
         if (isOwnProfile) {
             editButton.setOnClickListener(v -> {
-                Intent intent = new Intent(this, EditProfileActivity.class);
-                startActivity(intent);
+                startActivity(new Intent(this, EditProfileActivity.class));
             });
 
             logoutButton.setOnClickListener(v -> showLogoutConfirmationDialog());
 
-            bottomNavigationView.setSelectedItemId(R.id.navigation_chats); // Profile is usually reached from here or home
             bottomNavigationView.setOnItemSelectedListener(item -> {
                 int itemId = item.getItemId();
                 if (itemId == R.id.navigation_home) {
@@ -72,6 +80,8 @@ public class ProfileActivity extends AppCompatActivity {
                 return false;
             });
         }
+        
+        refreshProfileData();
     }
 
     private void showLogoutConfirmationDialog() {
@@ -94,17 +104,13 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        String viewUsername = getIntent().getStringExtra("VIEW_USERNAME");
-        if (viewUsername == null) {
-            SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-            String username = sharedPref.getString("LOGGED_IN_USER", null);
-            if (username != null) {
-                setupProfileData(username);
-            }
+        if (isOwnProfile) {
+            refreshProfileData();
         }
     }
 
-    private void setupProfileData(String username) {
+    private void refreshProfileData() {
+        if (username == null) return;
         databaseHelper db = new databaseHelper(this);
         userData user = db.getUserProfile(username);
 

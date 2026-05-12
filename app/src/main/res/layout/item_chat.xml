@@ -14,6 +14,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:src="@drawable/ic_profile_placeholder"
+        android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/ShapeAppearance.App.CircleImageView" />
 
     <TextView

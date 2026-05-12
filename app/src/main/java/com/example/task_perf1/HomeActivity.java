@@ -29,11 +29,14 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Removed manual padding logic to prevent "ugly" double gaps.
+        // The UI will now be handled by fitsSystemWindows="true" in the XML.
+
         databaseHelper db = new databaseHelper(this);
         SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
 
-        // 1. Setup Interests (Static list for now)
+        // 1. Setup Interests
         RecyclerView interestsRecyclerView = findViewById(R.id.interests_recycler_view);
         InterestAdapter interestAdapter = new InterestAdapter(this, interestsArr);
         interestsRecyclerView.setAdapter(interestAdapter);
@@ -43,12 +46,7 @@ public class HomeActivity extends AppCompatActivity {
         ImageView profileIcon = findViewById(R.id.profile_icon);
         profileIcon.setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
         
-        // Load Current User Profile Pic
-        userData user = db.getUserProfile(currentUser);
-        if (user != null && user.profilePicture != null) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
-            profileIcon.setImageBitmap(bitmap);
-        }
+        refreshProfileIcon(db, currentUser);
 
         // 3. Setup Recent Chats from Database
         List<String> chatsList = db.loadChatHistory(currentUser);
@@ -86,6 +84,26 @@ public class HomeActivity extends AppCompatActivity {
         if (getIntent().getBooleanExtra("WELCOME_TOAST", false)) {
             Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show();
             getIntent().removeExtra("WELCOME_TOAST");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseHelper db = new databaseHelper(this);
+        SharedPreferences sharedPref = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        String currentUser = sharedPref.getString("LOGGED_IN_USER", "");
+        refreshProfileIcon(db, currentUser);
+    }
+
+    private void refreshProfileIcon(databaseHelper db, String currentUser) {
+        ImageView profileIcon = findViewById(R.id.profile_icon);
+        userData user = db.getUserProfile(currentUser);
+        if (user != null && user.profilePicture != null) {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(user.profilePicture, 0, user.profilePicture.length);
+            profileIcon.setImageBitmap(bitmap);
+        } else {
+            profileIcon.setImageResource(R.drawable.icons8_profile);
         }
     }
 }

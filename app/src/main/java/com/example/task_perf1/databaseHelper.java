@@ -298,15 +298,25 @@ public class databaseHelper extends SQLiteOpenHelper{
     public String getRandomUser(String currentUsername) {
         SQLiteDatabase db = this.getReadableDatabase();
         int currentUserID = getUserID(currentUsername);
+        if (currentUserID == -1) return null;
         
+        // Query to match users with shared interests, excluding current user, archived, blocked, AND existing chat partners
         String interestMatchQuery = "SELECT u.username FROM users u JOIN interests i ON u.userID = i.userID " +
                 "WHERE u.username != ? AND u.isArchived = 0 " +
                 "AND u.userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
                 "AND u.userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?) " +
-                "AND i.interest IN (SELECT interest FROM interests WHERE userID = (SELECT userID FROM users WHERE username = ?)) " +
+                "AND u.userID NOT IN (SELECT ReceiverID FROM messages WHERE SenderID = ?) " +
+                "AND u.userID NOT IN (SELECT SenderID FROM messages WHERE ReceiverID = ?) " +
+                "AND i.interest IN (SELECT interest FROM interests WHERE userID = ?) " +
                 "ORDER BY RANDOM() LIMIT 1";
         
-        Cursor cursor = db.rawQuery(interestMatchQuery, new String[]{currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID), currentUsername});
+        Cursor cursor = db.rawQuery(interestMatchQuery, new String[]{
+                currentUsername, 
+                String.valueOf(currentUserID), String.valueOf(currentUserID),
+                String.valueOf(currentUserID), String.valueOf(currentUserID),
+                String.valueOf(currentUserID)
+        });
+        
         if (cursor.moveToFirst()) {
             String partner = cursor.getString(0);
             cursor.close();
@@ -314,10 +324,20 @@ public class databaseHelper extends SQLiteOpenHelper{
         }
         cursor.close();
 
-        Cursor fallback = db.rawQuery("SELECT username FROM users WHERE username != ? AND isArchived = 0 " +
+        // Fallback: Random user excluding current user, archived, blocked, AND existing chat partners
+        String fallbackQuery = "SELECT username FROM users WHERE username != ? AND isArchived = 0 " +
                 "AND userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
                 "AND userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?) " +
-                "ORDER BY RANDOM() LIMIT 1", new String[]{currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID)});
+                "AND userID NOT IN (SELECT ReceiverID FROM messages WHERE SenderID = ?) " +
+                "AND userID NOT IN (SELECT SenderID FROM messages WHERE ReceiverID = ?) " +
+                "ORDER BY RANDOM() LIMIT 1";
+        
+        Cursor fallback = db.rawQuery(fallbackQuery, new String[]{
+                currentUsername, 
+                String.valueOf(currentUserID), String.valueOf(currentUserID),
+                String.valueOf(currentUserID), String.valueOf(currentUserID)
+        });
+        
         String partner = null;
         if (fallback.moveToFirst()) {
             partner = fallback.getString(0);
@@ -355,14 +375,22 @@ public class databaseHelper extends SQLiteOpenHelper{
         List<userData> users = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         int currentUserID = getUserID(currentUsername);
+        if (currentUserID == -1) return users;
         
+        // Load users by interest, excluding current user, archived, blocked, AND existing chat partners
         String query = "SELECT u.* FROM users u " +
                 "JOIN interests i ON u.userID = i.userID " +
                 "WHERE i.interest = ? AND u.username != ? AND u.isArchived = 0 " +
                 "AND u.userID NOT IN (SELECT blockedID FROM blocked_users WHERE userID = ?) " +
-                "AND u.userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?)";
+                "AND u.userID NOT IN (SELECT userID FROM blocked_users WHERE blockedID = ?) " +
+                "AND u.userID NOT IN (SELECT ReceiverID FROM messages WHERE SenderID = ?) " +
+                "AND u.userID NOT IN (SELECT SenderID FROM messages WHERE ReceiverID = ?)";
         
-        Cursor cursor = db.rawQuery(query, new String[]{interestType, currentUsername, String.valueOf(currentUserID), String.valueOf(currentUserID)});
+        Cursor cursor = db.rawQuery(query, new String[]{
+                interestType, currentUsername, 
+                String.valueOf(currentUserID), String.valueOf(currentUserID),
+                String.valueOf(currentUserID), String.valueOf(currentUserID)
+        });
 
         if (cursor.moveToFirst()) {
             do {
