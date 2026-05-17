@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 import android.widget.EditText;
 import android.widget.Toast;
+import java.util.regex.Pattern;
 
 public class AccountCreationStep2Fragment extends Fragment {
 
@@ -24,32 +25,54 @@ public class AccountCreationStep2Fragment extends Fragment {
         Button nextButton = view.findViewById(R.id.next_button);
         ViewPager2 viewPager = getActivity().findViewById(R.id.view_pager);
 
+        EditText username = view.findViewById(R.id.username_input);
+        EditText password = view.findViewById(R.id.password_input);
+        EditText confirmPassword = view.findViewById(R.id.confirm_password_input);
+
         backButton.setOnClickListener(v -> {
-            // Go to the previous tab
             viewPager.setCurrentItem(viewPager.getCurrentItem() - 1);
         });
 
         nextButton.setOnClickListener(v -> {
             AccountCreationDataStorage ACA = new ViewModelProvider(requireActivity()).get(AccountCreationDataStorage.class);
 
-            EditText username = view.findViewById(R.id.username_input);
-            EditText password = view.findViewById(R.id.password_input);
-
-            String usn = username.getText().toString();
+            String usn = username.getText().toString().trim();
             String pss = password.getText().toString();
+            String cpss = confirmPassword.getText().toString();
 
-            if(usn.isEmpty() || pss.isEmpty()){
+            if(usn.isEmpty() || pss.isEmpty() || cpss.isEmpty()){
                 Toast.makeText(getContext(), "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            else{
-                ACA.username = usn;
-                ACA.password = pss;
-
-                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
+            if (!pss.equals(cpss)) {
+                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            if (!isValidPassword(pss)) {
+                Toast.makeText(getContext(), "Password must be at least 8 characters, contain uppercase, lowercase, a number, and a special character (no spaces).", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            ACA.username = usn;
+            ACA.password = pss;
+            viewPager.setCurrentItem(viewPager.getCurrentItem() + 1);
         });
 
         return view;
+    }
+
+    private boolean isValidPassword(String password) {
+        // Regex: 
+        // ^(?=.*[0-9])        # a digit must occur at least once
+        // (?=.*[a-z])         # a lower case letter must occur at least once
+        // (?=.*[A-Z])         # an upper case letter must occur at least once
+        // (?=.*[@#$%^&+=!_\\-?]) # a special character must occur at least once
+        // (?=\S+$)            # no whitespace allowed in the entire string
+        // .{8,}               # at least 8 characters
+        // $
+        String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!_\\-?])(?=\\S+$).{8,}$";
+        return Pattern.compile(passwordPattern).matcher(password).matches();
     }
 }
